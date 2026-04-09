@@ -1,0 +1,336 @@
+:root {
+  /* Colors */
+  --bg-main: #0B0B0E;
+  --bg-panel: #1A1A24;
+  --bg-panel-hover: #222230;
+  
+  --text-primary: #F0F0F5;
+  --text-secondary: #8E8EA0;
+  
+  --accent-primary: #6366F1;
+  --accent-hover: #4F46E5;
+  
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  
+  --border: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(99, 102, 241, 0.5);
+
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+  
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  
+  /* Font */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+/* Base Glass Panel */
+.glass-panel {
+  background: rgba(26, 26, 36, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* Button variants */
+.btn-primary {
+  background: var(--accent-primary);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+  background: var(--bg-panel-hover);
+  color: var(--text-primary);
+}
+
+/* Tags */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Utilities */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.mt-4 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
+.w-full { width: 100%; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-panel-hover);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* Responsive Layout */
+.layout-main {
+  flex: 1;
+  margin-left: 240px;
+  padding: 32px 48px;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.sidebar-nav {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.grid-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* Modals & Forms */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(10, 12, 20, 0.8); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px;
+}
+
+.modal-content {
+  background: var(--bg-panel); border: 1px solid var(--border); padding: 24px; border-radius: var(--radius-md); width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto;
+}
+
+.grid-1-2 {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) 2fr;
+  gap: 32px;
+}
+
+.grid-invoices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 20px;
+}
+
+.form-grid-4 { display: grid; grid-template-columns: 140px 1fr 160px 100px; gap: 16px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 120px; gap: 16px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.form-grid-invoice { display: grid; grid-template-columns: 130px 2fr 1.5fr 120px; gap: 12px; }
+
+/* Mobile Collapsible */
+.mobile-collapse-content { display: block; }
+.mobile-toggle-icon { display: none; transition: transform 0.2s; }
+.mobile-collapsible-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+/* Hide on Mobile Utils */
+.hide-mobile { display: flex; }
+
+@media (max-width: 1024px) {
+  .grid-cards { grid-template-columns: repeat(2, 1fr); }
+  .grid-charts { grid-template-columns: 1fr; }
+  .layout-main { padding: 24px; }
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-nav.hide-on-mobile-home {
+    display: none !important;
+  }
+  .layout-main.no-bottom-nav-mobile {
+    padding-bottom: 32px !important;
+  }
+  
+  .layout-main {
+    margin-left: 0;
+    padding: 16px;
+    padding-bottom: 100px; /* Space for bottom nav */
+  }
+  
+  .sidebar-nav {
+    width: 100%;
+    height: 70px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    top: auto;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 8px 16px;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+  }
+  
+  .sidebar-logo { display: none !important; }
+  .sidebar-user { display: none !important; }
+  .sidebar-links { flex-direction: row !important; width: 100%; justify-content: space-between; gap: 4px !important; }
+  
+  .sidebar-link-text { display: none; }
+  .sidebar-link { flex-direction: column !important; padding: 8px !important; gap: 4px !important; flex: 1; justify-content: center; }
+  .sidebar-link svg { width: 24px; height: 24px; }
+  
+  .grid-cards { grid-template-columns: 1fr; }
+  .grid-1-2 { grid-template-columns: 1fr; }
+  .grid-invoices { grid-template-columns: 1fr; }
+  .form-grid-4, .form-grid-3, .form-grid-2, .form-grid-invoice { grid-template-columns: 1fr; }
+  
+  .responsive-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .responsive-stack {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .mobile-collapse-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-in-out;
+  }
+  .mobile-collapse-content.expanded {
+    grid-template-rows: 1fr;
+  }
+  .mobile-collapse-inner {
+    overflow: hidden;
+  }
+  .mobile-toggle-icon { display: inline-flex; }
+  .mobile-toggle-icon.expanded { transform: rotate(180deg); }
+  
+  .hide-mobile { display: none !important; }
+  
+  h1 { font-size: 24px !important; }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop { display: none !important; }
+}
