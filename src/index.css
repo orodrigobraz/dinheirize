@@ -221,6 +221,34 @@ h1, h2, h3, h4 {
   gap: 20px;
 }
 
+.month-group-header {
+  margin-bottom: 24px;
+}
+
+@media (min-width: 769px) {
+  .month-group-header {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 550px));
+    gap: 20px;
+  }
+  .month-group-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .month-group-header-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}
+
 .form-grid-4 { display: grid; grid-template-columns: 140px 1fr 160px 100px; gap: 16px; }
 .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 120px; gap: 16px; }
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

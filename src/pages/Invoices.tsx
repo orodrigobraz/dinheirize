@@ -118,10 +118,12 @@ export const Invoices: React.FC = () => {
 
             return (
               <div key={month} style={{ borderLeft: '4px solid var(--accent-primary)', paddingLeft: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-                  <h2 style={{ fontSize: '22px', fontWeight: 700 }}>{monthNames[month - 1]} {selectedYear}</h2>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '4px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'left' }}>
-                    Total: <br className="hide-desktop" /> <span style={{ whiteSpace: 'nowrap' }}>R$ {sumOfMonth.toFixed(2)}</span>
+                <div className="month-group-header">
+                  <div className="month-group-header-content">
+                    <h2 style={{ fontSize: '22px', fontWeight: 700 }}>{monthNames[month - 1]} {selectedYear}</h2>
+                    <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '4px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'left' }}>
+                      Total: <br className="hide-desktop" /> <span style={{ whiteSpace: 'nowrap' }}>R$ {sumOfMonth.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -160,16 +162,16 @@ export const Invoices: React.FC = () => {
                                 onChange={(e) => { e.stopPropagation(); updateInvoiceStatus(inv.id, e.target.value as any); }}
                                 onClick={(e) => e.stopPropagation()}
                                 style={{ 
-                                  padding: '6px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: 800, textAlign: 'center', letterSpacing: '0.5px',
+                                  padding: '6px 0', width: '86px', borderRadius: '12px', fontSize: '11px', fontWeight: 700, textAlign: 'center', letterSpacing: '0.5px',
                                   background: inv.status === 'paid' ? 'rgba(16, 185, 129, 0.15)' : inv.status === 'open' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                                   color: inv.status === 'paid' ? '#10B981' : inv.status === 'open' ? '#F59E0B' : '#EF4444',
                                   border: `1px solid ${inv.status === 'paid' ? 'rgba(16, 185, 129, 0.3)' : inv.status === 'open' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, 
                                   cursor: 'pointer', appearance: 'none', outline: 'none', flexShrink: 0
                                 }}
                               >
-                                <option value="future" style={{ background: '#EF4444', color: '#FFFFFF', fontWeight: 600 }}>FUTURA</option>
-                                <option value="open" style={{ background: '#F59E0B', color: '#FFFFFF', fontWeight: 600 }}>ABERTA</option>
-                                <option value="paid" style={{ background: '#10B981', color: '#FFFFFF', fontWeight: 600 }}>PAGA</option>
+                                <option value="future" style={{ background: '#EF4444', color: '#FFFFFF', fontWeight: 700, letterSpacing: '0.5px' }}>FUTURA</option>
+                                <option value="open" style={{ background: '#F59E0B', color: '#FFFFFF', fontWeight: 700, letterSpacing: '0.5px' }}>ABERTA</option>
+                                <option value="paid" style={{ background: '#10B981', color: '#FFFFFF', fontWeight: 700, letterSpacing: '0.5px' }}>PAGA</option>
                               </select>
                             </div>
                             

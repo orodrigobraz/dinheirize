@@ -29,7 +29,7 @@ export const Sidebar: React.FC = () => {
         <SidebarLink 
           to="/" 
           exact
-          icon={<img src={`${import.meta.env.BASE_URL}cifrao.png`} alt="Home" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />} 
+          icon={<img src={`${import.meta.env.BASE_URL}cifrao.png`} alt="Home" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />} 
           label="Início" 
           className="hide-desktop"
         />
