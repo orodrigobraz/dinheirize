@@ -217,7 +217,7 @@ h1, h2, h3, h4 {
 
 .grid-invoices {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(400px, 550px));
   gap: 20px;
 }
 
@@ -252,6 +252,7 @@ h1, h2, h3, h4 {
 }
 
 @media (max-width: 768px) {
+  .w-full-mobile { width: 100%; display: flex; }
   .home-grid {
     grid-template-columns: 1fr;
   }

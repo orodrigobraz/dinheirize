@@ -27,7 +27,6 @@ function remapHue(rawHue: number): number {
   const SKIP_START = 55;
   const SKIP_END = 85;
   const SKIP_WIDTH = SKIP_END - SKIP_START;
-  const USABLE = 360 - SKIP_WIDTH;
 
   const h = rawHue % 360;
   if (h < SKIP_START) return h;

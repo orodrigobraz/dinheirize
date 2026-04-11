@@ -64,7 +64,7 @@ export const Invoices: React.FC = () => {
 
       {/* Filtros */}
       <div className="glass-panel" style={{ padding: '20px 24px', marginBottom: '32px', display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="w-full-mobile" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Filter size={18} color="var(--text-secondary)" />
           <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Filtros:</span>
         </div>
@@ -118,10 +118,10 @@ export const Invoices: React.FC = () => {
 
             return (
               <div key={month} style={{ borderLeft: '4px solid var(--accent-primary)', paddingLeft: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
                   <h2 style={{ fontSize: '22px', fontWeight: 700 }}>{monthNames[month - 1]} {selectedYear}</h2>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '4px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                    Total: R$ {sumOfMonth.toFixed(2)}
+                  <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', padding: '4px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', textAlign: 'left' }}>
+                    Total: <br className="hide-desktop" /> <span style={{ whiteSpace: 'nowrap' }}>R$ {sumOfMonth.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -144,40 +144,44 @@ export const Invoices: React.FC = () => {
                       <div key={inv.id} className="glass-panel" style={{ borderRadius: '12px', overflow: 'hidden' }}>
                         {/* Header da Fatura (Clicável) */}
                         <div 
-                          style={{ padding: '16px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: isExpanded ? 'rgba(255,255,255,0.03)' : 'transparent', transition: 'background 0.2s' }}
+                          style={{ padding: '16px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', background: isExpanded ? 'rgba(255,255,255,0.03)' : 'transparent', transition: 'background 0.2s' }}
                           onClick={() => toggleInvoice(inv.id)}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                              {card?.name.charAt(0).toUpperCase()}
+                          <div className="hide-mobile" style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>
+                            {card?.name.charAt(0).toUpperCase()}
+                          </div>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '6px', minWidth: 0 }}>
+                            {/* Linha 1: Nome do Cartão --- Situação */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ fontWeight: 600, fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card?.name}</div>
+                              <select 
+                                value={inv.status}
+                                onChange={(e) => { e.stopPropagation(); updateInvoiceStatus(inv.id, e.target.value as any); }}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ 
+                                  padding: '6px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: 800, textAlign: 'center', letterSpacing: '0.5px',
+                                  background: inv.status === 'paid' ? 'rgba(16, 185, 129, 0.15)' : inv.status === 'open' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                  color: inv.status === 'paid' ? '#10B981' : inv.status === 'open' ? '#F59E0B' : '#EF4444',
+                                  border: `1px solid ${inv.status === 'paid' ? 'rgba(16, 185, 129, 0.3)' : inv.status === 'open' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, 
+                                  cursor: 'pointer', appearance: 'none', outline: 'none', flexShrink: 0
+                                }}
+                              >
+                                <option value="future" style={{ background: '#EF4444', color: '#FFFFFF', fontWeight: 600 }}>FUTURA</option>
+                                <option value="open" style={{ background: '#F59E0B', color: '#FFFFFF', fontWeight: 600 }}>ABERTA</option>
+                                <option value="paid" style={{ background: '#10B981', color: '#FFFFFF', fontWeight: 600 }}>PAGA</option>
+                              </select>
                             </div>
-                            <div>
-                              <div style={{ fontWeight: 600, fontSize: '15px' }}>{card?.name}</div>
-                              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Venc. {dueDateStr}</div>
+                            
+                            {/* Linha 2: Vencimento --- Valor */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '8px' }}>Venc. {dueDateStr}</div>
+                              <div style={{ fontWeight: 700, fontSize: '15px', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>R$ {total.toFixed(2)}</div>
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            <div style={{ fontWeight: 700, fontSize: '15px' }}>R$ {total.toFixed(2)}</div>
-                            <select 
-                              value={inv.status}
-                              onChange={(e) => { e.stopPropagation(); updateInvoiceStatus(inv.id, e.target.value as any); }}
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ 
-                                padding: '6px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: 800, textAlign: 'center', letterSpacing: '0.5px',
-                                background: inv.status === 'paid' ? 'rgba(16, 185, 129, 0.15)' : inv.status === 'open' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                                color: inv.status === 'paid' ? '#10B981' : inv.status === 'open' ? '#F59E0B' : '#EF4444',
-                                border: `1px solid ${inv.status === 'paid' ? 'rgba(16, 185, 129, 0.3)' : inv.status === 'open' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, 
-                                cursor: 'pointer', appearance: 'none', outline: 'none'
-                              }}
-                            >
-                              <option value="future" style={{ background: 'var(--bg-main)', color: 'var(--text-primary)' }}>FUTURA</option>
-                              <option value="open" style={{ background: 'var(--bg-main)', color: 'var(--text-primary)' }}>ABERTA</option>
-                              <option value="paid" style={{ background: 'var(--bg-main)', color: 'var(--text-primary)' }}>PAGA</option>
-                            </select>
-                            <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
-                              {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                            </div>
+                          <div style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', paddingLeft: '8px' }}>
+                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                           </div>
                         </div>
 
@@ -331,11 +335,14 @@ export const Invoices: React.FC = () => {
                                   }
 
                                   return (
-                                    <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                      <div>
-                                        <div style={{ fontSize: '15px', fontWeight: 500, display: 'flex', gap: '12px', alignItems: 'center', color: 'var(--text-primary)' }}>
-                                          {tx.description}
-                                          <div style={{ display: 'flex', gap: '4px' }}>
+                                    <div key={tx.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                      {/* Linha Superior: Nome, Tags, Editar */}
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, minWidth: 0 }}>
+                                          <span style={{ fontSize: '15px', fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {tx.description}
+                                          </span>
+                                          <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                                             {tx.tags?.map(tid => {
                                               const t = data.tags?.find(tag => tag.id === tid);
                                               const tagName = t ? t.name : tid;
@@ -358,25 +365,29 @@ export const Invoices: React.FC = () => {
                                               ) : null;
                                             })}
                                           </div>
-                                          <button 
-                                            onClick={() => {
-                                              setEditingTxId(tx.id);
-                                              setEditTxDesc(tx.description);
-                                              setEditTxAmount(tx.amount.toString());
-                                              setEditTxDate(tx.date || '');
-                                              
-                                              const tagNames = (tx.tags || []).map(tid => {
-                                                const t = data.tags.find(tag => tag.id === tid);
-                                                return t ? t.name : tid;
-                                              }).join(' ');
-                                              setEditTxTags(tagNames);
-                                            }}
-                                            style={{ fontSize: '11px', color: 'var(--accent-primary)', fontWeight: 600, opacity: 0.8 }}
-                                          >
-                                            EDITAR
-                                          </button>
                                         </div>
-                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                                        <button 
+                                          onClick={() => {
+                                            setEditingTxId(tx.id);
+                                            setEditTxDesc(tx.description);
+                                            setEditTxAmount(tx.amount.toString());
+                                            setEditTxDate(tx.date || '');
+                                            
+                                            const tagNames = (tx.tags || []).map(tid => {
+                                              const t = data.tags.find(tag => tag.id === tid);
+                                              return t ? t.name : tid;
+                                            }).join(' ');
+                                            setEditTxTags(tagNames);
+                                          }}
+                                          style={{ fontSize: '11px', color: 'var(--accent-primary)', fontWeight: 600, opacity: 0.8, flexShrink: 0 }}
+                                        >
+                                          EDITAR
+                                        </button>
+                                      </div>
+                                      
+                                      {/* Linha Inferior: Data, Parcelas, Valor */}
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', gap: '8px', alignItems: 'center' }}>
                                           <span>{tx.date}</span>
                                           {tx.installments > 1 && (
                                             <span style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
@@ -384,9 +395,9 @@ export const Invoices: React.FC = () => {
                                             </span>
                                           )}
                                         </div>
-                                      </div>
-                                      <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
-                                        R$ {tx.amount.toFixed(2)}
+                                        <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                          R$ {tx.amount.toFixed(2)}
+                                        </div>
                                       </div>
                                     </div>
                                   );

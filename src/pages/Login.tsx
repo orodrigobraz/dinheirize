@@ -59,16 +59,17 @@ export const Login: React.FC = () => {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <div style={{
-            width: '60px', height: '60px', borderRadius: '16px',
-            background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 18px',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.5)',
           }}>
-            <span style={{ color: '#fff', fontSize: '26px', fontWeight: 800, letterSpacing: '-1px' }}>F</span>
+            <img 
+              src={`${import.meta.env.BASE_URL}cifrao.png`} 
+              alt="Dinheirize Logo" 
+              style={{ width: '60px', height: '60px', objectFit: 'contain' }} 
+            />
           </div>
           <h1 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.5px' }}>
-            FinanceApp
+            Dinheirize
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5 }}>
             Controle financeiro pessoal

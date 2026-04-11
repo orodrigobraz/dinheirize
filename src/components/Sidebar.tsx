@@ -14,7 +14,7 @@ export const Sidebar: React.FC = () => {
       <div className="sidebar-logo" style={{ padding: '0 12px', marginBottom: '4px' }}>
         <Link to="/" style={{ textDecoration: 'none', display: 'block' }}>
           <h2 style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <img src="/cifrao.png" alt="Dinheirize Logo" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
+            <img src={`${import.meta.env.BASE_URL}cifrao.png`} alt="Dinheirize Logo" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
             Dinheirize
           </h2>
         </Link>
@@ -29,7 +29,7 @@ export const Sidebar: React.FC = () => {
         <SidebarLink 
           to="/" 
           exact
-          icon={<img src="/cifrao.png" alt="Home" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />} 
+          icon={<img src={`${import.meta.env.BASE_URL}cifrao.png`} alt="Home" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />} 
           label="Início" 
           className="hide-desktop"
         />
