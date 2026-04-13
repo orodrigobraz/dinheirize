@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useData } from '../hooks/useData';
 import type { Invoice } from '../types/finance';
 import { isWeekend, addDays, format } from 'date-fns';
 import { Trash2, ChevronDown, ChevronRight, Filter } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { getTagColor } from '../utils/tagColor';
+import { Toast } from '../components/Toast';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export const Invoices: React.FC = () => {
   const { data, updateInvoiceStatus, updateInvoiceTransaction, deleteInvoiceTransaction } = useData();
@@ -19,7 +21,21 @@ export const Invoices: React.FC = () => {
   const [editTxTags, setEditTxTags] = useState('');
   const [editTxDate, setEditTxDate] = useState('');
 
-  // States for Accordion (Expanded Invoices)
+  // Toast
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
+  // Modal de confirmação para exclusão de transação
+  const [deletePending, setDeletePending] = useState<{ invoiceId: string; txId: string } | null>(null);
+
+  // Modal de confirmação para salvar edição de transação
+  const [savePending, setSavePending] = useState<{
+    invoiceId: string;
+    txId: string;
+    data: { description: string; amount: number; tags: string[]; date: string };
+  } | null>(null);
+
+  // Estados para Acordeão (Faturas Expandidas)
   const [expandedInvoices, setExpandedInvoices] = useState<string[]>([]);
 
   const toggleInvoice = (invoiceId: string) => {
@@ -34,15 +50,15 @@ export const Invoices: React.FC = () => {
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-  // Filter Invoices
+  // Filtrar Faturas
   const filteredInvoices = data.invoices.filter(inv => {
     if (inv.year !== selectedYear) return false;
     if (selectedMonth !== 0 && inv.month !== selectedMonth) return false;
     if (statusFilter !== 'all' && inv.status !== statusFilter) return false;
     return true;
-  }).sort((a, b) => b.month - a.month); // Descending by month
+  }).sort((a, b) => b.month - a.month); // Ordem decrescente por mês
 
-  // We want to group the filtered invoices by Month explicitly.
+  // Queremos agruvar as faturas filtradas por mês explicitamente.
   const groupedByMonth = filteredInvoices.reduce((acc, inv) => {
     if (!acc[inv.month]) acc[inv.month] = [];
     acc[inv.month].push(inv);
@@ -51,10 +67,52 @@ export const Invoices: React.FC = () => {
 
   const monthsToRender = Object.keys(groupedByMonth)
     .map(Number)
-    .sort((a, b) => b - a); // Descending months
+    .sort((a, b) => b - a); // Meses em ordem decrescente
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+      )}
+
+      {/* Modal de confirmação de exclusão de transação */}
+      {deletePending && (
+        <ConfirmModal
+          title="Excluir Transação"
+          message="Deseja realmente excluir esta transação? Se for uma compra parcelada, todas as parcelas associadas serão removidas."
+          confirmLabel="Sim, excluir"
+          cancelLabel="Não"
+          danger
+          onConfirm={() => {
+            deleteInvoiceTransaction(deletePending.invoiceId, deletePending.txId);
+            setEditingTxId(null);
+            setDeletePending(null);
+            setToast({ message: 'Transação excluída com sucesso.', type: 'success' });
+          }}
+          onCancel={() => setDeletePending(null)}
+        />
+      )}
+
+      {/* Modal de confirmação de edição de transação */}
+      {savePending && (
+        <ConfirmModal
+          title="Salvar Alterações"
+          message="Deseja realmente salvar as alterações feitas nesta transação?"
+          confirmLabel="Sim, salvar"
+          cancelLabel="Cancelar"
+          onConfirm={() => {
+            updateInvoiceTransaction(
+              savePending.invoiceId,
+              savePending.txId,
+              savePending.data
+            );
+            setEditingTxId(null);
+            setSavePending(null);
+            setToast({ message: 'Transação editada com sucesso!', type: 'success' });
+          }}
+          onCancel={() => setSavePending(null)}
+        />
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
           <h1 style={{ fontSize: '28px', marginBottom: '8px' }}>Faturas</h1>
@@ -295,40 +353,43 @@ export const Invoices: React.FC = () => {
                                           </div>
                                         </div>
 
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                                          {tx.installments > 1 ? (
-                                            <div style={{ fontSize: '12px', color: 'var(--warning)', fontWeight: 500, flex: 1 }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+                                          {tx.installments > 1 && (
+                                            <div style={{ fontSize: '12px', color: 'var(--warning)', fontWeight: 500, lineHeight: 1.5 }}>
                                               ⚠️ Aviso: ao apagar, todas as {tx.installments} parcelas associadas serão excluídas do sistema.
                                             </div>
-                                          ) : <div style={{ flex: 1 }}></div>}
-                                          
-                                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                          )}
+
+                                          {/* Linha 1: Salvar Alterações */}
+                                          <button 
+                                            className="btn-primary" style={{ width: '100%', padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '14px' }}
+                                            onClick={() => {
+                                              setSavePending({
+                                                invoiceId: inv.id,
+                                                txId: tx.id,
+                                                data: {
+                                                  description: editTxDesc,
+                                                  amount: parseFloat(editTxAmount) || tx.amount,
+                                                  tags: editTxTags.split(/[\s,]+/).filter(t => t.trim() !== ''),
+                                                  date: editTxDate || tx.date,
+                                                }
+                                              });
+                                            }}
+                                          >
+                                            Salvar Alterações
+                                          </button>
+
+                                          {/* Linha 2: Excluir + Cancelar */}
+                                          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                             <button 
-                                              className="btn-ghost" style={{ padding: '8px', color: 'var(--danger)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}
-                                              onClick={() => {
-                                                deleteInvoiceTransaction(inv.id, tx.id);
-                                                setEditingTxId(null);
-                                              }}
+                                              className="btn-ghost" style={{ padding: '8px', color: 'var(--danger)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', flexShrink: 0 }}
+                                              onClick={() => setDeletePending({ invoiceId: inv.id, txId: tx.id })}
                                               title="Apagar transação permanentemente"
                                             >
                                               <Trash2 size={18} />
                                             </button>
-                                            <button className="btn-ghost" style={{ padding: '8px 16px', borderRadius: '8px' }} onClick={() => setEditingTxId(null)}>
+                                            <button className="btn-ghost" style={{ padding: '8px 16px', borderRadius: '8px', flex: 1 }} onClick={() => setEditingTxId(null)}>
                                               Cancelar
-                                            </button>
-                                            <button 
-                                              className="btn-primary" style={{ padding: '8px 24px', borderRadius: '8px', fontWeight: 600 }}
-                                              onClick={() => {
-                                                updateInvoiceTransaction(inv.id, tx.id, {
-                                                  description: editTxDesc,
-                                                  amount: parseFloat(editTxAmount) || tx.amount,
-                                                  tags: editTxTags.split(/[\s,]+/).filter(t => t.trim() !== ''),
-                                                  date: editTxDate || tx.date
-                                                });
-                                                setEditingTxId(null);
-                                              }}
-                                            >
-                                              Salvar Alterações
                                             </button>
                                           </div>
                                         </div>

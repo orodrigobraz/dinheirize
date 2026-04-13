@@ -8,7 +8,7 @@ const INITIAL_DATA: AppData = {
   invoices: []
 };
 
-// LocalStorage primary layer
+// Camada primária do LocalStorage
 export const loadFromLocal = (): AppData => {
   const data = localStorage.getItem('finance_data');
   if (data) {
@@ -29,7 +29,7 @@ export const saveToLocal = (data: AppData) => {
   localStorage.setItem('finance_data', JSON.stringify(data));
 };
 
-// File System Access API layer (Chrome/Edge)
+// Camada de API de Acesso ao Sistema de Arquivos (Chrome/Edge)
 type FileSystemPickerWindow = Window & typeof globalThis & {
   showOpenFilePicker: (opts: object) => Promise<FileSystemFileHandle[]>;
 };
@@ -37,7 +37,7 @@ type FileSystemPickerWindow = Window & typeof globalThis & {
 let fileHandle: FileSystemFileHandle | null = null;
 let onFileHandleChange: ((connected: boolean) => void) | null = null;
 
-// Firefox/Safari fallback: keep last loaded data for re-export on save
+// Fallback para Firefox/Safari: mantém últimos dados carregados para re-exportar ao salvar
 let fallbackMode = false;
 
 export const isFileSystemSupported = () => {
@@ -52,7 +52,7 @@ export const onFileConnectionChange = (cb: (connected: boolean) => void) => {
   onFileHandleChange = cb;
 };
 
-// Helper: read a File object and parse AppData
+// Helper: ler um objeto File e fazer o parse de AppData
 const parseFileContents = async (file: File): Promise<AppData> => {
   const contents = await file.text();
   if (contents.trim() === '') return INITIAL_DATA;
@@ -63,7 +63,7 @@ const parseFileContents = async (file: File): Promise<AppData> => {
   return parsed;
 };
 
-// Helper: open file via hidden <input> (Firefox/Safari fallback)
+// Helper: abrir arquivo via <input> oculto (fallback para Firefox/Safari)
 const openFileViaInput = (): Promise<AppData | null> => {
   return new Promise((resolve) => {
     const input = document.createElement('input');
@@ -97,7 +97,7 @@ const openFileViaInput = (): Promise<AppData | null> => {
 };
 
 export const selectFileForSync = async (): Promise<AppData | null> => {
-  // Chrome/Edge: use File System Access API (supports write-back)
+  // Chrome/Edge: usar API de Acesso ao Sistema de Arquivos (suporta gravação)
   if (isFileSystemSupported()) {
     try {
       const picker = (window as FileSystemPickerWindow).showOpenFilePicker;
@@ -110,18 +110,18 @@ export const selectFileForSync = async (): Promise<AppData | null> => {
       const file = await handle.getFile();
       return await parseFileContents(file);
     } catch (e) {
-      // User cancelled or error
+      // Usuário cancelou ou erro
       console.error('File selection cancelled or failed:', e);
       return null;
     }
   }
 
-  // Firefox/Safari: use hidden <input type="file">
+  // Firefox/Safari: usar <input type="file"> oculto
   return openFileViaInput();
 };
 
 export const syncToFile = async (data: AppData) => {
-  // Chrome/Edge: write back to the same file silently
+  // Chrome/Edge: gravar de volta no mesmo arquivo silenciosamente
   if (fileHandle) {
     try {
       const writable = await fileHandle.createWritable();
@@ -132,8 +132,8 @@ export const syncToFile = async (data: AppData) => {
     }
     return;
   }
-  // Firefox/Safari fallback: no silent write-back, data is saved to localStorage only
-  // User must manually export to keep the file updated
+  // Fallback para Firefox/Safari: sem gravação silenciosa, dados salvos apenas no localStorage
+  // O usuário deve exportar manualmente para manter o arquivo atualizado
 };
 
 export const exportFileFallback = (data: AppData) => {

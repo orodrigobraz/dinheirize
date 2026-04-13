@@ -18,14 +18,14 @@ export interface Tag {
 export interface Transaction {
   id: string;
   amount: number;
-  date: string; // ISO String or YYYY-MM-DD
+  date: string; // String ISO ou YYYY-MM-DD
   description: string;
   type: TransactionType;
-  tags: string[]; // tag ids or plain strings
-  cardId?: string; // If 'credit'
-  installments: number; // 1 for one-off
-  currentInstallment?: number; // Helps identify which installment this is
-  groupId?: string; // Links installments together
+  tags: string[]; // ids de tags ou strings simples
+  cardId?: string; // Se for 'credit'
+  installments: number; // 1 para pagamento único
+  currentInstallment?: number; // Ajuda a identificar qual é esta parcela
+  groupId?: string; // Vincula parcelas juntas
 }
 
 export type InvoiceStatus = 'open' | 'paid' | 'future';
@@ -36,13 +36,13 @@ export interface Invoice {
   month: number; // 1-12
   year: number;
   status: InvoiceStatus;
-  transactions: Transaction[]; // Transactions mapped to this invoice specifically
+  transactions: Transaction[]; // Transações mapeadas especificamente para esta fatura
 }
 
 export interface AppData {
   version: string;
   cards: Card[];
   tags: Tag[];
-  transactions: Transaction[]; // All non-credit or one-off records
-  invoices: Invoice[]; // All card invoices over time
+  transactions: Transaction[]; // Todos os registros que não são de crédito ou são pagamentos únicos
+  invoices: Invoice[]; // Todas as faturas de cartão ao longo do tempo
 }

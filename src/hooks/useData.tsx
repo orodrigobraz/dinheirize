@@ -41,7 +41,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('syncing');
 
-  // On mount: try Supabase. If empty + localStorage has data → auto-migrate.
+  // Ao montar: tentar Supabase. Se vazio + localStorage tiver dados → auto-migrar.
   useEffect(() => {
     const localData = loadFromLocal();
 
@@ -54,7 +54,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           supaData.invoices.length === 0;
 
         if (supaData && !supaEmpty) {
-          // Supabase has data — use it as source of truth
+          // Supabase tem dados — usar como fonte da verdade
           const filtered = {
             ...supaData,
             invoices: supaData.invoices.filter(inv => inv.transactions && inv.transactions.length > 0),
@@ -63,10 +63,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           saveToLocal(filtered);
           setSyncStatus('synced');
         } else if (supaEmpty && localData.cards.length === 0 && localData.invoices.length === 0) {
-          // Both empty — fresh start
+          // Ambos vazios — começo limpo
           setSyncStatus('synced');
         } else {
-          // Supabase empty but localStorage has data → auto-migrate!
+          // Supabase vazio, mas localStorage tem dados → auto-migrar!
           fullSyncToSupabase(localData)
             .then(() => setSyncStatus('synced'))
             .catch(() => setSyncStatus('error'));
@@ -76,7 +76,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Full replace — syncs everything to Supabase
+  // Substituição completa — sincroniza tudo com o Supabase
   const setData = (newData: AppData) => {
     const filtered = {
       ...newData,

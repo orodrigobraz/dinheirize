@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useData } from '../hooks/useData';
 import type { Transaction } from '../types/finance';
 import { getTagColor } from '../utils/tagColor';
+import { Toast } from '../components/Toast';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export const Transactions: React.FC = () => {
   const { data, addTransaction, deleteTag } = useData();
@@ -15,6 +17,13 @@ export const Transactions: React.FC = () => {
   const [installments, setInstallments] = useState('1');
   const [tagsInput, setTagsInput] = useState('');
 
+  // Toast
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
+  // Modal de confirmação para excluir tag
+  const [tagToDelete, setTagToDelete] = useState<string | null>(null);
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !description) return;
@@ -23,10 +32,10 @@ export const Transactions: React.FC = () => {
     const parsedAmount = parseFloat(amount.replace(',', '.'));
     if (isNaN(parsedAmount)) return;
 
-    // Split tags by comma or space
+    // Separar tags por vírgula ou espaço
     const tagsArr = tagsInput.split(/[\s,]+/).filter(t => t.trim() !== '');
 
-    // Set the date to the 1st of the selected month so it perfectly falls into the target invoice
+    // Definir a data para o dia 1 do mês selecionado para cair perfeitamente na fatura alvo
     const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`;
 
     const newTx: Transaction = {
@@ -42,11 +51,14 @@ export const Transactions: React.FC = () => {
 
     addTransaction(newTx);
 
-    // Reset Form
+    // Limpar formulário
     setAmount('');
     setDescription('');
     setTagsInput('');
     setInstallments('1');
+
+    // Exibir toast de sucesso
+    setToast({ message: 'Despesa adicionada com sucesso!', type: 'success' });
   };
 
   const handleAppendTag = (tagName: string) => {
@@ -69,10 +81,29 @@ export const Transactions: React.FC = () => {
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+      )}
+
+      {tagToDelete && (
+        <ConfirmModal
+          title="Excluir Tag"
+          message={`Deseja realmente apagar a tag "${tagToDelete}" definitivamente? Esta ação não pode ser desfeita.`}
+          confirmLabel="Sim, excluir"
+          cancelLabel="Não"
+          danger
+          onConfirm={() => {
+            deleteTag(tagToDelete);
+            setTagToDelete(null);
+          }}
+          onCancel={() => setTagToDelete(null)}
+        />
+      )}
+
       <h1 style={{ fontSize: '28px', marginBottom: '32px' }}>Transações</h1>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {/* Add Transaction Form */}
+        {/* Formulário de Adicionar Transação */}
         <div className="glass-panel" style={{ padding: '28px' }}>
           <h2 style={{ fontSize: '18px', marginBottom: '24px' }}>Nova Despesa</h2>
           <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -174,7 +205,7 @@ export const Transactions: React.FC = () => {
               )}
             </div>
 
-            {/* Row 4: Tags */}
+            {/* Linha 4: Tags */}
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Tags (separadas por espaço/vírgula)</label>
               <input
@@ -208,7 +239,7 @@ export const Transactions: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => { if(window.confirm(`Apagar a tag "${tName}" definitivamente?`)) deleteTag(tName); }}
+                          onClick={() => setTagToDelete(tName)}
                           style={{ background: `${tagColor}18`, color: 'var(--danger)', padding: '0 8px', borderTopRightRadius: '16px', borderBottomRightRadius: '16px', borderLeft: `1px solid ${tagColor}30`, cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center' }}
                           title="Apagar Tag Definitivamente"
                         >✕</button>
@@ -222,7 +253,7 @@ export const Transactions: React.FC = () => {
               </span>
             </div>
 
-            {/* Submit */}
+            {/* Enviar */}
             <div>
               <button type="submit" className="btn-primary" style={{ padding: '12px 32px', fontSize: '15px', fontWeight: 600 }}>
                 Adicionar Despesa
@@ -232,7 +263,7 @@ export const Transactions: React.FC = () => {
           </form>
         </div>
 
-        {/* Recent Transactions — last added */}
+        {/* Transações Recentes — última adicionada */}
         <div className="glass-panel" style={{ padding: '24px' }}>
           <h2 style={{ fontSize: '18px', marginBottom: '24px' }}>Última Transação Adicionada</h2>
           {data.transactions.length === 0 ? (

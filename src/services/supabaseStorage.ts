@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import type { AppData, Card, Tag, Transaction, Invoice, InvoiceStatus } from '../types/finance';
 
-// ─── Auth helper ──────────────────────────────────────────────────────────────
+// ─── Helper de Autenticação ───────────────────────────────────────────────────
 
 const getUserId = async (): Promise<string | null> => {
   const { data: { user } } = await supabase.auth.getUser();
@@ -51,7 +51,7 @@ const mapInvTx = (t: Record<string, unknown>, cardId: string): Transaction => ({
   groupId: (t.group_id as string) ?? undefined,
 });
 
-// ─── Load ─────────────────────────────────────────────────────────────────────
+// ─── Carregar ─────────────────────────────────────────────────────────────────
 
 export const loadFromSupabase = async (): Promise<AppData | null> => {
   try {
@@ -99,16 +99,16 @@ export const loadFromSupabase = async (): Promise<AppData | null> => {
   }
 };
 
-// ─── Full sync (wipe + re-insert all data for this user) ─────────────────────
+// ─── Sincronização completa (apagar + reinserir todos os dados deste usuário) ──
 
 export const fullSyncToSupabase = async (data: AppData): Promise<void> => {
   const userId = await getUserId();
   if (!userId) { console.error('fullSyncToSupabase: no user'); return; }
 
   try {
-    // Delete only current user's data (RLS + user_id filter)
+    // Deletar apenas os dados do usuário atual (RLS + filtro de user_id)
     await supabase.from('transactions').delete().eq('user_id', userId);
-    await supabase.from('invoices').delete().eq('user_id', userId);  // cascades invoice_transactions + tags
+    await supabase.from('invoices').delete().eq('user_id', userId);  // cascata em invoice_transactions + tags
     await supabase.from('cards').delete().eq('user_id', userId);
     await supabase.from('tags').delete().eq('user_id', userId);
 
@@ -158,7 +158,7 @@ export const fullSyncToSupabase = async (data: AppData): Promise<void> => {
   }
 };
 
-// ─── Cards ────────────────────────────────────────────────────────────────────
+// ─── Cartões ──────────────────────────────────────────────────────────────────
 
 export const sb_addCard = async (card: Card) => {
   const userId = await getUserId();
@@ -196,7 +196,7 @@ export const sb_deleteTag = async (tagName: string) => {
   if (error) console.error('sb_deleteTag:', error);
 };
 
-// ─── Direct transactions ──────────────────────────────────────────────────────
+// ─── Transações diretas ───────────────────────────────────────────────────────
 
 export const sb_addDirectTransaction = async (tx: Transaction) => {
   const userId = await getUserId();
@@ -215,7 +215,7 @@ export const sb_addDirectTransaction = async (tx: Transaction) => {
   }
 };
 
-// ─── Invoice transactions ─────────────────────────────────────────────────────
+// ─── Transações de fatura ─────────────────────────────────────────────────────
 
 export type InvoiceTxPair = {
   invoiceId: string;
@@ -252,14 +252,14 @@ export const sb_addInvoiceTransactions = async (pairs: InvoiceTxPair[]) => {
   }
 };
 
-// ─── Invoice status ───────────────────────────────────────────────────────────
+// ─── Status da fatura ─────────────────────────────────────────────────────────
 
 export const sb_updateInvoiceStatus = async (invoiceId: string, status: InvoiceStatus) => {
   const { error } = await supabase.from('invoices').update({ status }).eq('id', invoiceId);
   if (error) console.error('sb_updateInvoiceStatus:', error);
 };
 
-// ─── Update invoice transaction ───────────────────────────────────────────────
+// ─── Atualizar transação de fatura ────────────────────────────────────────────
 
 export const sb_updateInvoiceTransaction = async (
   txId: string,
@@ -295,7 +295,7 @@ export const sb_updateInvoiceTransaction = async (
   }
 };
 
-// ─── Delete invoice transaction(s) ───────────────────────────────────────────
+// ─── Deletar transação(ões) de fatura ─────────────────────────────────────────
 
 export const sb_deleteInvoiceTransaction = async (txId: string, groupId?: string) => {
   if (groupId) {

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useData } from '../hooks/useData';
 import type { Card } from '../types/finance';
+import { Toast } from '../components/Toast';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export const Cards: React.FC = () => {
   const { data, addCard, updateCard, deleteCard } = useData();
@@ -12,6 +14,16 @@ export const Cards: React.FC = () => {
   const [isCredit, setIsCredit] = useState(true);
   const [isDebit, setIsDebit] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
+
+  // Toast
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const closeToast = useCallback(() => setToast(null), []);
+
+  // Modais de confirmação
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  // Dados temporários a salvar na confirmação de edição
+  const [pendingSave, setPendingSave] = useState<Omit<Card, 'id'> | null>(null);
 
   const handleValidityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -27,46 +39,62 @@ export const Cards: React.FC = () => {
     setClosureDay(calcClosure);
   };
 
-  const handleCreateCard = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!cardName) return;
+  /** Valida o formulário; retorna os dados do cartão ou null se inválido */
+  const buildCardData = (): Omit<Card, 'id'> | null => {
+    if (!cardName) return null;
 
     if (validity.length === 5) {
       const [month, year] = validity.split('/');
       const currentYear = Number(new Date().getFullYear().toString().slice(-2));
       if (Number(year) < currentYear) {
-        alert("O ano de validade não pode ser inferior ao ano atual.");
-        return;
+        alert('O ano de validade não pode ser inferior ao ano atual.');
+        return null;
       }
       if (Number(month) < 1 || Number(month) > 12) {
-        alert("O mês de validade é inválido. Use um formato entre 01 e 12.");
-        return;
+        alert('O mês de validade é inválido. Use um formato entre 01 e 12.');
+        return null;
       }
     }
 
     const cardType = (isCredit && isDebit) ? 'both' : (isCredit ? 'credit' : 'debit');
+    return {
+      name: cardName,
+      closureDay: Number(closureDay),
+      dueDay: Number(dueDay),
+      validity: validity || undefined,
+      cardType,
+    };
+  };
+
+  const handleCreateCard = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const cardData = buildCardData();
+    if (!cardData) return;
 
     if (editingCardId) {
-      updateCard({
-        id: editingCardId,
-        name: cardName,
-        closureDay: Number(closureDay),
-        dueDay: Number(dueDay),
-        validity: validity || undefined,
-        cardType
-      });
-      setEditingCardId(null);
+      // Edição: abre modal de confirmação
+      setPendingSave(cardData);
+      setShowSaveConfirm(true);
     } else {
-      addCard({
-        id: crypto.randomUUID(),
-        name: cardName,
-        closureDay: Number(closureDay),
-        dueDay: Number(dueDay),
-        validity: validity || undefined,
-        cardType
-      });
+      // Novo cartão: adiciona diretamente
+      addCard({ id: crypto.randomUUID(), ...cardData });
+      resetForm();
+      setToast({ message: 'Cartão adicionado com sucesso!', type: 'success' });
     }
+  };
 
+  const confirmSave = () => {
+    if (!editingCardId || !pendingSave) return;
+    updateCard({ id: editingCardId, ...pendingSave });
+    resetForm();
+    setShowSaveConfirm(false);
+    setPendingSave(null);
+    setToast({ message: 'Cartão editado com sucesso!', type: 'success' });
+  };
+
+  const resetForm = () => {
+    setEditingCardId(null);
     setCardName('');
     setDueDay(1);
     setClosureDay(24);
@@ -82,33 +110,60 @@ export const Cards: React.FC = () => {
     setDueDay(c.dueDay);
     setClosureDay(c.closureDay);
     setValidity(c.validity || '');
-    
-    // Default to credit only if old card had no type
+
+    // Fazer padrão para crédito apenas se o cartão antigo não tivesse tipo
     const t = c.cardType || 'credit';
     setIsCredit(t === 'credit' || t === 'both');
     setIsDebit(t === 'debit' || t === 'both');
   };
 
-  const cancelEdit = () => {
-    setEditingCardId(null);
-    setCardName('');
-    setDueDay(1);
-    setClosureDay(24);
-    setValidity('');
-    setIsCredit(true);
-    setIsDebit(false);
-  };
+  const cancelEdit = () => resetForm();
 
   const handleDeleteCard = () => {
     if (!editingCardId) return;
-    if (window.confirm("Atenção: Ao excluir este cartão, TODAS as faturas, parcelamentos e informações atreladas a ele serão apagadas. Você tem certeza?")) {
-      deleteCard(editingCardId);
-      cancelEdit();
-    }
+    setShowDeleteConfirm(true);
   };
 
   return (
     <div>
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+      )}
+
+      {/* Modal de confirmação de exclusão */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="Excluir Cartão"
+          message="Atenção: Ao excluir este cartão, TODAS as faturas, parcelamentos e informações atreladas a ele serão apagadas permanentemente. Deseja continuar?"
+          confirmLabel="Sim, excluir"
+          cancelLabel="Não"
+          danger
+          onConfirm={() => {
+            if (editingCardId) {
+              deleteCard(editingCardId);
+              cancelEdit();
+            }
+            setShowDeleteConfirm(false);
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+
+      {/* Modal de confirmação de edição */}
+      {showSaveConfirm && (
+        <ConfirmModal
+          title="Salvar Alterações"
+          message="Deseja realmente salvar as alterações feitas neste cartão?"
+          confirmLabel="Sim, salvar"
+          cancelLabel="Cancelar"
+          onConfirm={confirmSave}
+          onCancel={() => {
+            setShowSaveConfirm(false);
+            setPendingSave(null);
+          }}
+        />
+      )}
+
       <h1 style={{ fontSize: '28px', marginBottom: '32px' }}>Gerenciar Cartões</h1>
 
       <div className="grid-1-2">

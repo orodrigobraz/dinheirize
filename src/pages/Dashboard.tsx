@@ -9,7 +9,7 @@ export const Dashboard: React.FC = () => {
 
   const currentYear = new Date().getFullYear();
 
-  // Calculate available years from data
+  // Calcular anos disponíveis com base nos dados
   const yearsSet = new Set<number>([currentYear]);
   data.transactions.forEach(tx => yearsSet.add(new Date(tx.date).getFullYear()));
   data.invoices.forEach(inv => yearsSet.add(inv.year));
@@ -20,10 +20,10 @@ export const Dashboard: React.FC = () => {
 
   const toggleCard = (card: string) => setExpandedCards(prev => ({ ...prev, [card]: !prev[card] }));
 
-  // Extract all transactions for the selected year
+  // Extrair todas as transações para o ano selecionado
   const yearTx: { desc: string; amount: number; tags: string[]; date: string }[] = [];
 
-  // Also track installment info separately (invoice transactions only)
+  // Também rastrear informações de parcelas separadamente (apenas transações de faturas)
   type TxEntry = { desc: string; amount: number; totalAmount: number; installments: number; originalInstallments: number; tags: string[]; date: string };
   const allTxEntries: TxEntry[] = [];
 
@@ -34,7 +34,7 @@ export const Dashboard: React.FC = () => {
     }
   });
 
-  // Track original purchases (group installments by groupId or description+amount to find the total cost THIS year)
+  // Rastrear compras originais (agrupar parcelas por groupId ou descrição+valor para encontrar o custo total NESTE ano)
   const purchaseTotals = new Map<string, TxEntry>();
   data.invoices.forEach(inv => {
     if (inv.year === selectedYear) {
@@ -63,15 +63,15 @@ export const Dashboard: React.FC = () => {
 
   purchaseTotals.forEach(entry => allTxEntries.push(entry));
 
-  // Analytics Math
+  // Cálculos de Análise
   const totalYearExpenses = yearTx.reduce((acc, t) => acc + t.amount, 0);
 
-  // Largest purchase by TOTAL cost (installments × parcel value)
+  // Maior compra pelo custo TOTAL (parcelas × valor da parcela)
   const maxTotalTx = allTxEntries.length > 0
     ? allTxEntries.reduce((max, t) => t.totalAmount > max.totalAmount ? t : max, allTxEntries[0])
     : null;
 
-  // Largest SINGLE transaction (one-time or individual parcel, whichever is biggest as a single charge)
+  // Maior transação ÚNICA (compra à vista ou parcela individual, a que for maior como cobrança única)
   const maxSingleTx = allTxEntries.length > 0
     ? allTxEntries.filter(t => t.installments === 1).reduce((max, t) => t.amount > max.amount ? t : max, allTxEntries.filter(t => t.installments === 1)[0] ?? allTxEntries[0])
     : null;
@@ -94,7 +94,7 @@ export const Dashboard: React.FC = () => {
     .sort((a, b) => b.value - a.value)
     .slice(0, 3);
 
-  // Monthly Chart Data
+  // Dados do Gráfico Mensal
   const chartData = [];
   const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   
@@ -137,7 +137,7 @@ export const Dashboard: React.FC = () => {
     });
   }
 
-  // Pie Chart Data
+  // Dados do Gráfico de Pizza
   const pieData = Object.entries(categorySums)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
@@ -181,7 +181,7 @@ export const Dashboard: React.FC = () => {
     return null;
   };
 
-  // Resolve tag IDs to names for a transaction entry
+  // Resolver IDs de tags para nomes para o registro da transação
   const resolveTags = (tags: string[]) =>
     tags
       .map(tid => data.tags.find(t => t.id === tid)?.name ?? tid)
@@ -331,7 +331,7 @@ export const Dashboard: React.FC = () => {
       </div>
       
       <div className="grid-charts">
-        {/* Bar Chart */}
+        {/* Gráfico de Barras */}
         <div className="glass-panel" style={{ padding: '24px', height: '360px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Acumulado Mensal</h3>
@@ -361,7 +361,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Pie Chart */}
+        {/* Gráfico de Pizza */}
         <div className="glass-panel" style={{ padding: '24px', height: '360px', display: 'flex', flexDirection: 'column' }}>
           <h3 style={{ marginBottom: '16px', fontSize: '16px', fontWeight: 600 }}>Distribuição por Categoria</h3>
           <div style={{ flex: 1, position: 'relative' }}>
@@ -389,7 +389,7 @@ export const Dashboard: React.FC = () => {
               </ResponsiveContainer>
             )}
 
-            {/* Custom Legend */}
+            {/* Legenda Customizada */}
             {pieData.length > 0 && (
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
                 {pieData.slice(0, 4).map((entry) => (

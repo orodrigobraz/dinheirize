@@ -10,7 +10,7 @@ import { Transactions } from './pages/Transactions';
 import { Cards } from './pages/Cards';
 import { Invoices } from './pages/Invoices';
 
-// Shows spinner or app content once auth+data are ready
+// Mostra o spinner ou o conteúdo do app quando auth+data estiverem prontos
 const AppRoutes: React.FC = () => {
   const { loading } = useData();
   return (
@@ -49,7 +49,7 @@ const AppRoutes: React.FC = () => {
   );
 };
 
-// Auth gate: shows Login if unauthenticated, wraps app in DataProvider if authenticated
+// Auth gate: mostra o Login se não autenticado, envolve o app no DataProvider se autenticado
 const AuthGate: React.FC = () => {
   const { user, authLoading } = useAuth();
 

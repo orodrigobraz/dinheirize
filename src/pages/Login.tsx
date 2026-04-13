@@ -27,7 +27,7 @@ export const Login: React.FC = () => {
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* Background blobs */}
+      {/* Bolhas de Fundo */}
       <div style={{
         position: 'absolute', width: '700px', height: '700px', borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 65%)',
@@ -44,7 +44,7 @@ export const Login: React.FC = () => {
         bottom: '100px', left: '100px', pointerEvents: 'none',
       }} />
 
-      {/* Card */}
+      {/* Cartão */}
       <div style={{
         width: '100%', maxWidth: '420px', margin: '0 20px',
         padding: '48px 40px',

@@ -20,12 +20,13 @@ export const Sidebar: React.FC = () => {
         </Link>
       </div>
 
-      {/* Navigation */}
+      {/* Navegação */}
       <nav className="sidebar-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
         <SidebarLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+        <SidebarLink to="/invoices" icon={<FileText size={20} />} label="Faturas" />
         <SidebarLink to="/transactions" icon={<Receipt size={20} />} label="Transações" />
-        
-        {/* Core Hub / Home */}
+
+        {/* Hub Principal / Início — apenas mobile */}
         <SidebarLink 
           to="/" 
           exact
@@ -34,12 +35,11 @@ export const Sidebar: React.FC = () => {
           className="hide-desktop"
         />
 
-        <SidebarLink to="/invoices" icon={<FileText size={20} />} label="Faturas" />
         <SidebarLink to="/cards" icon={<CreditCard size={20} />} label="Cartões" />
       </nav>
 
 
-      {/* User info + logout */}
+      {/* Info do usuário + sair */}
       <div className="sidebar-user" style={{
         borderTop: '1px solid var(--border)', paddingTop: '14px',
         display: 'flex', flexDirection: 'column', gap: '8px',
