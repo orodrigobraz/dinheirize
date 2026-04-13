@@ -13,7 +13,7 @@ export const Sidebar: React.FC = () => {
       {/* Logo */}
       <div className="sidebar-logo" style={{ padding: '0 12px', marginBottom: '4px' }}>
         <Link to="/" style={{ textDecoration: 'none', display: 'block' }}>
-          <h2 style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+          <h2 style={{ color: '#D4AF37', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <img src={`${import.meta.env.BASE_URL}cifrao.png`} alt="Dinheirize Logo" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
             Dinheirize
           </h2>
@@ -23,10 +23,9 @@ export const Sidebar: React.FC = () => {
       {/* Navegação */}
       <nav className="sidebar-links" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
         <SidebarLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
-        <SidebarLink to="/invoices" icon={<FileText size={20} />} label="Faturas" />
         <SidebarLink to="/transactions" icon={<Receipt size={20} />} label="Transações" />
 
-        {/* Hub Principal / Início — apenas mobile */}
+        {/* Hub Principal / Início — apenas mobile no centro */}
         <SidebarLink 
           to="/" 
           exact
@@ -35,6 +34,7 @@ export const Sidebar: React.FC = () => {
           className="hide-desktop"
         />
 
+        <SidebarLink to="/invoices" icon={<FileText size={20} />} label="Faturas" />
         <SidebarLink to="/cards" icon={<CreditCard size={20} />} label="Cartões" />
       </nav>
 

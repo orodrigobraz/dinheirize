@@ -24,6 +24,27 @@ export const Transactions: React.FC = () => {
   // Modal de confirmação para excluir tag
   const [tagToDelete, setTagToDelete] = useState<string | null>(null);
 
+  // Guarda a última transação adicionada nesta sessão para exibição super imediata e 100% perfeita
+  const [lastAddedTx, setLastAddedTx] = useState<{ tx: Transaction; cardName?: string } | null>(null);
+
+  // Dado um cartão e um mês/ano, avança até o primeiro mês não pago e alerta o usuário
+  const aplicarProximoMesNaoPago = (cId: string, mesInicial: number, anoInicial: number, isManualChange: boolean = false) => {
+    let m = mesInicial;
+    let y = anoInicial;
+    for (let i = 0; i < 24; i++) {
+      const inv = data.invoices.find(inv => inv.cardId === cId && inv.month === m && inv.year === y);
+      if (!inv || inv.status !== 'paid') break;
+      m++;
+      if (m > 12) { m = 1; y++; }
+    }
+    setSelectedMonth(m);
+    setSelectedYear(y);
+
+    if (isManualChange && (m !== mesInicial || y !== anoInicial)) {
+      setToast({ message: 'O mês escolhido já possuía uma fatura paga, avançamos para o próximo.', type: 'info' });
+    }
+  };
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !description) return;
@@ -50,6 +71,12 @@ export const Transactions: React.FC = () => {
     };
 
     addTransaction(newTx);
+
+    // Guarda a transação recém-adicionada para visualização imediata exata
+    const cName = (type === 'credit' || type === 'debit')
+      ? data.cards.find(c => c.id === cardId)?.name
+      : undefined;
+    setLastAddedTx({ tx: newTx, cardName: cName });
 
     // Limpar formulário
     setAmount('');
@@ -141,7 +168,18 @@ export const Transactions: React.FC = () => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Mês de Referência</label>
-                <select style={{ width: '100%', boxSizing: 'border-box' }} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
+                <select
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  value={selectedMonth}
+                  onChange={e => {
+                    const newMonth = Number(e.target.value);
+                    if ((type === 'credit' || type === 'debit') && cardId) {
+                      aplicarProximoMesNaoPago(cardId, newMonth, selectedYear, true);
+                    } else {
+                      setSelectedMonth(newMonth);
+                    }
+                  }}
+                >
                   <option value={1}>Janeiro</option>
                   <option value={2}>Fevereiro</option>
                   <option value={3}>Março</option>
@@ -158,7 +196,18 @@ export const Transactions: React.FC = () => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Ano</label>
-                <select style={{ width: '100%', boxSizing: 'border-box' }} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
+                <select 
+                  style={{ width: '100%', boxSizing: 'border-box' }} 
+                  value={selectedYear} 
+                  onChange={e => {
+                    const newYear = Number(e.target.value);
+                    if ((type === 'credit' || type === 'debit') && cardId) {
+                      aplicarProximoMesNaoPago(cardId, selectedMonth, newYear, true);
+                    } else {
+                      setSelectedYear(newYear);
+                    }
+                  }}
+                >
                   {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -170,7 +219,18 @@ export const Transactions: React.FC = () => {
             <div className={type === 'credit' ? 'form-grid-3' : (type === 'debit' ? 'form-grid-2' : 'form-grid-1')}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Método de Pagamento</label>
-                <select style={{ width: '100%', boxSizing: 'border-box' }} value={type} onChange={e => setType(e.target.value as 'credit' | 'pix' | 'debit' | 'cash')}>
+                <select
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                  value={type}
+                  onChange={e => {
+                    const newType = e.target.value as 'credit' | 'pix' | 'debit' | 'cash';
+                    setType(newType);
+                    // Auto-avança se o novo tipo usa cartão e já tem um selecionado
+                    if ((newType === 'credit' || newType === 'debit') && cardId) {
+                      aplicarProximoMesNaoPago(cardId, selectedMonth, selectedYear);
+                    }
+                  }}
+                >
                   <option value="credit">Cartão de Crédito</option>
                   <option value="pix">Pix</option>
                   <option value="debit">Cartão de Débito</option>
@@ -181,7 +241,19 @@ export const Transactions: React.FC = () => {
                 <>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Cartão Selecionado</label>
-                    <select style={{ width: '100%', boxSizing: 'border-box' }} value={cardId} onChange={e => setCardId(e.target.value)} required>
+                    <select
+                      style={{ width: '100%', boxSizing: 'border-box' }}
+                      value={cardId}
+                      onChange={e => {
+                        const newCardId = e.target.value;
+                        setCardId(newCardId);
+                        // Auto-avança para o próximo mês não pago deste cartão
+                        if (newCardId) {
+                          aplicarProximoMesNaoPago(newCardId, selectedMonth, selectedYear);
+                        }
+                      }}
+                      required
+                    >
                       <option value="">Selecione um Cartão</option>
                       {data.cards
                         .filter(c => type === 'credit' ? (c.cardType === 'credit' || c.cardType === 'both' || !c.cardType) : (c.cardType === 'debit' || c.cardType === 'both'))
@@ -263,39 +335,137 @@ export const Transactions: React.FC = () => {
           </form>
         </div>
 
-        {/* Transações Recentes — última adicionada */}
+        {/* Última Transação Adicionada — qualquer método */}
         <div className="glass-panel" style={{ padding: '24px' }}>
           <h2 style={{ fontSize: '18px', marginBottom: '24px' }}>Última Transação Adicionada</h2>
-          {data.transactions.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>Nenhuma despesa direta encontrada.</p>
-          ) : (() => {
-            const tx = data.transactions[data.transactions.length - 1];
-            const methodLabel: Record<string, string> = { credit: 'Cartão de Crédito', pix: 'Pix', debit: 'Débito', cash: 'Dinheiro' };
+          {(() => {
+            const methodLabel: Record<string, string> = {
+              credit: 'Cartão de Crédito',
+              pix: 'Pix',
+              debit: 'Cartão de Débito',
+              cash: 'Dinheiro',
+            };
+            const methodColor: Record<string, string> = {
+              credit: '#6366F1',
+              pix: '#10B981',
+              debit: '#3B82F6',
+              cash: '#F59E0B',
+            };
+
+            // Prioridade: o que acabou de ser adicionado AGORA. Se recarregar a página, cai pro fallback de createdAt
+            let entry: { tx: Transaction; cardName?: string } | null = lastAddedTx;
+
+            if (!entry) {
+              // Combina diretas + de faturas e ordena pelo createdAt (mais recente primeiro)
+              type TxEntry = { tx: Transaction; cardName?: string };
+              const seenGroups = new Set<string>();
+              const all: TxEntry[] = [
+                ...data.transactions.map(tx => ({ tx })),
+                ...data.invoices.flatMap(inv => {
+                  const card = data.cards.find(c => c.id === inv.cardId);
+                  // Pega apenas a 1ª parcela de um grupo para não duplicar na exibição global
+                  return inv.transactions
+                    .filter(tx => {
+                      const key = tx.groupId ?? tx.id;
+                      if (seenGroups.has(key)) return false;
+                      seenGroups.add(key);
+                      return true;
+                    })
+                    .map(tx => ({
+                      tx: { ...tx, type: 'credit' as const },
+                      cardName: card?.name,
+                    }));
+                }),
+              ];
+
+              if (all.length > 0) {
+                // Ordena com alta precisão usando epoch do timestamp (novo primeiro), fallback para date
+                all.sort((a, b) => {
+                  const ca = a.tx.createdAt ? new Date(a.tx.createdAt).getTime() : 0;
+                  const cb = b.tx.createdAt ? new Date(b.tx.createdAt).getTime() : 0;
+                  if (ca !== cb) return cb - ca;
+                  return b.tx.date.localeCompare(a.tx.date);
+                });
+                entry = all[0];
+              }
+            }
+
+            if (!entry) {
+              return <p style={{ color: 'var(--text-secondary)' }}>Nenhuma transação registrada ainda.</p>;
+            }
+
+            const { tx, cardName } = entry;
+            const color = methodColor[tx.type] ?? '#D4AF37';
+
             return (
               <div style={{
-                padding: '20px',
-                background: 'rgba(99,102,241,0.06)',
-                border: '1px solid rgba(99,102,241,0.25)',
+                padding: '18px',
+                background: `${color}0D`,
+                border: `1px solid ${color}40`,
                 borderRadius: '12px',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: '16px',
+                flexDirection: 'column',
+                gap: '12px',
               }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <span style={{
-                      width: '8px', height: '8px', borderRadius: '50%',
-                      background: '#6366F1', flexShrink: 0,
-                      boxShadow: '0 0 8px #6366F1',
-                    }} />
-                    <p style={{ fontWeight: 700, fontSize: '16px' }}>{tx.description}</p>
-                  </div>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px', paddingLeft: '18px' }}>
-                    {tx.date} &bull; {methodLabel[tx.type] ?? tx.type}
-                    {tx.installments > 1 && ` • ${tx.installments}x`}
+                {/* Linha 1: ponto + nome + valor */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{
+                    width: '8px', height: '8px', borderRadius: '50%',
+                    background: color, flexShrink: 0,
+                    boxShadow: `0 0 8px ${color}`,
+                  }} />
+                  <p style={{
+                    fontWeight: 700, fontSize: '15px',
+                    flex: 1, minWidth: 0,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {tx.description}
                   </p>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', paddingLeft: '18px' }}>
+                  <span style={{ fontWeight: 800, fontSize: '18px', color: color, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    R$ {tx.amount.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Linha 2: badge do método + nome do cartão + parcelas */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                    padding: '3px 10px', borderRadius: '99px',
+                    background: `${color}20`, border: `1px solid ${color}50`,
+                    color, fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap',
+                  }}>
+                    {tx.type === 'credit' && '💳'}
+                    {tx.type === 'pix'    && '⚡'}
+                    {tx.type === 'debit'  && '🏧'}
+                    {tx.type === 'cash'   && '💵'}
+                    {' '}{methodLabel[tx.type] ?? tx.type}
+                  </span>
+                  {cardName && (
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      {cardName}
+                    </span>
+                  )}
+                  {tx.installments > 1 && (
+                    <span style={{
+                      fontSize: '11px', fontWeight: 600,
+                      padding: '2px 8px', borderRadius: '6px',
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-secondary)', whiteSpace: 'nowrap',
+                    }}>
+                      {tx.installments}x
+                    </span>
+                  )}
+                </div>
+
+                {/* Linha 3: data */}
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '-4px' }}>
+                  {tx.date}
+                </p>
+
+                {/* Tags */}
+                {tx.tags.length > 0 && (
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                     {tx.tags.map(tid => {
                       const t = data.tags.find(tag => tag.id === tid);
                       if (!t) return null;
@@ -307,26 +477,10 @@ export const Transactions: React.FC = () => {
                       );
                     })}
                   </div>
-                </div>
-                <div style={{
-                  fontWeight: 800, fontSize: '22px',
-                  color: 'var(--text-primary)', whiteSpace: 'nowrap',
-                }}>
-                  R$ {tx.amount.toFixed(2)}
-                </div>
+                )}
               </div>
             );
           })()}
-
-          {data.transactions.length > 1 && (
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '14px', textAlign: 'right' }}>
-              + {data.transactions.length - 1} transaç{data.transactions.length - 1 === 1 ? 'ão anterior' : 'ões anteriores'} diretas registradas.
-            </p>
-          )}
-
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '12px', lineHeight: 1.5 }}>
-            Nota: Compras via Cartão de Crédito aparecem nas Faturas da aba correspondente.
-          </p>
         </div>
       </div>
     </div>

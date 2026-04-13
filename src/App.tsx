@@ -26,7 +26,7 @@ const AppRoutes: React.FC = () => {
           <div style={{
             width: '40px', height: '40px', borderRadius: '50%',
             border: '3px solid rgba(99,102,241,0.2)',
-            borderTopColor: '#6366F1',
+            borderTopColor: '#D4AF37',
             animation: 'spin 0.8s linear infinite',
           }} />
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
@@ -62,7 +62,7 @@ const AuthGate: React.FC = () => {
         <div style={{
           width: '40px', height: '40px', borderRadius: '50%',
           border: '3px solid rgba(99,102,241,0.2)',
-          borderTopColor: '#6366F1',
+          borderTopColor: '#D4AF37',
           animation: 'spin 0.8s linear infinite',
         }} />
       </div>

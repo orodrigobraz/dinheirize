@@ -7,15 +7,15 @@
   --text-primary: #F0F0F5;
   --text-secondary: #8E8EA0;
   
-  --accent-primary: #6366F1;
-  --accent-hover: #4F46E5;
+  --accent-primary: #D4AF37;
+  --accent-hover: #B5952F;
   
   --success: #10B981;
   --danger: #EF4444;
-  --warning: #F59E0B;
+  --warning: #D4AF37;
   
   --border: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(99, 102, 241, 0.5);
+  --border-focus: rgba(212, 175, 55, 0.5);
 
   --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
@@ -66,8 +66,8 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px var(--border-focus);
+  border-color: #D4AF37;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
 }
 
 a {

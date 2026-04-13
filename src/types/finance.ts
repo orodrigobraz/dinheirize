@@ -19,6 +19,7 @@ export interface Transaction {
   id: string;
   amount: number;
   date: string; // String ISO ou YYYY-MM-DD
+  createdAt?: string; // Timestamp ISO de quando foi criada — para ordenar por inserção real
   description: string;
   type: TransactionType;
   tags: string[]; // ids de tags ou strings simples

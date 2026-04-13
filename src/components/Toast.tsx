@@ -49,7 +49,7 @@ export const Toast: React.FC<ToastProps> = ({
       bg: 'rgba(99, 102, 241, 0.12)',
       border: 'rgba(99, 102, 241, 0.35)',
       icon: 'ℹ',
-      color: '#6366F1',
+      color: '#D4AF37',
     },
   };
 

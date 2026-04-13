@@ -30,7 +30,7 @@ export const Login: React.FC = () => {
       {/* Bolhas de Fundo */}
       <div style={{
         position: 'absolute', width: '700px', height: '700px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 65%)',
+        background: 'radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 65%)',
         top: '-250px', left: '-200px', pointerEvents: 'none',
       }} />
       <div style={{
@@ -53,7 +53,7 @@ export const Login: React.FC = () => {
         WebkitBackdropFilter: 'blur(24px)',
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '24px',
-        boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1)',
+        boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(212, 175, 55, 0.1)',
         position: 'relative', zIndex: 1,
       }}>
         {/* Logo */}
@@ -155,12 +155,12 @@ export const Login: React.FC = () => {
               fontSize: '15px', fontWeight: 600,
               marginTop: '4px',
               background: loading
-                ? 'rgba(99,102,241,0.6)'
-                : 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+                ? 'rgba(212, 175, 55, 0.6)'
+                : 'linear-gradient(135deg, #D4AF37 0%, #B5952F 100%)',
               color: '#fff', border: 'none',
               borderRadius: '10px',
               cursor: loading ? 'wait' : 'pointer',
-              boxShadow: loading ? 'none' : '0 4px 20px rgba(99,102,241,0.45)',
+              boxShadow: loading ? 'none' : '0 4px 20px rgba(212, 175, 55, 0.45)',
               transition: 'all 0.2s ease',
               transform: 'none',
             }}

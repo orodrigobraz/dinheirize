@@ -201,7 +201,7 @@ export const Dashboard: React.FC = () => {
         <select 
           value={selectedYear} 
           onChange={e => setSelectedYear(Number(e.target.value))}
-          style={{ padding: '6px 16px', borderRadius: '8px', background: 'var(--bg-panel)', border: '1px solid var(--accent-primary)', color: 'var(--text-primary)', fontSize: '16px', fontWeight: 600 }}
+          style={{ padding: '6px 16px', borderRadius: '8px', background: 'var(--bg-panel)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '16px', fontWeight: 600 }}
         >
           {availableYears.map(y => (
             <option key={y} value={y}>{y}</option>

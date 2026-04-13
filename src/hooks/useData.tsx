@@ -133,7 +133,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resolvedTags = updatedTx.tags.map(tagName => {
         const ext = newTags.find(t => t.name.toLowerCase() === tagName.toLowerCase() || t.id === tagName);
         if (ext) return ext.id;
-        const newTag: Tag = { id: crypto.randomUUID(), name: tagName, color: '#6366F1' };
+        const newTag: Tag = { id: crypto.randomUUID(), name: tagName, color: '#F59E0B' };
         newTags.push(newTag);
         return newTag.id;
       });
@@ -255,6 +255,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     tx.tags = resolvedIds;
+    // Marca o momento exato de inserção para ordenar corretamente
+    tx.createdAt = new Date().toISOString();
     const createdTags = newTags.filter(t => !data.tags.find(ot => ot.id === t.id));
 
     if (tx.type !== 'credit') {
@@ -268,7 +270,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const card = data.cards.find(c => c.id === tx.cardId);
     if (!card) return;
 
-    const dateObj = new Date(tx.date);
+    const [y, m, d] = tx.date.split('-').map(Number);
+    const dateObj = new Date(y, m - 1, d);
     let invoiceMonth = dateObj.getMonth() + 1;
     let invoiceYear = dateObj.getFullYear();
     if (dateObj.getDate() > card.closureDay) {
