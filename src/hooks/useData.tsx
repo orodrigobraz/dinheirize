@@ -279,24 +279,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (invoiceMonth > 12) { invoiceMonth = 1; invoiceYear += 1; }
     }
 
-    const newInvoices = [...data.invoices];
+    // Clonamos o array e cada fatura de forma imutável para evitar mutação de estado do React
+    let newInvoices = data.invoices.map(inv => ({ ...inv, transactions: [...inv.transactions] }));
     const groupId = crypto.randomUUID();
     const pairs: InvoiceTxPair[] = [];
 
     for (let i = 0; i < tx.installments; i++) {
+      // Calcula mês/ano alvo para a parcela i de forma robusta
       let targetMonth = invoiceMonth + i;
       let targetYear = invoiceYear;
       while (targetMonth > 12) { targetMonth -= 12; targetYear += 1; }
 
-      let invoice = newInvoices.find(inv => inv.cardId === card.id && inv.month === targetMonth && inv.year === targetYear);
-      if (!invoice) {
-        invoice = { id: crypto.randomUUID(), cardId: card.id, month: targetMonth, year: targetYear, status: 'future', transactions: [] };
-        newInvoices.push(invoice);
-      }
-
+      const existingIdx = newInvoices.findIndex(inv => inv.cardId === card.id && inv.month === targetMonth && inv.year === targetYear);
       const installmentTx: Transaction = { ...tx, id: crypto.randomUUID(), currentInstallment: i + 1, groupId };
-      invoice.transactions.push(installmentTx);
-      pairs.push({ invoiceId: invoice.id, cardId: card.id, month: targetMonth, year: targetYear, status: invoice.status, tx: installmentTx });
+
+      if (existingIdx === -1) {
+        // Fatura ainda não existe — criar nova
+        const newInvoice = {
+          id: crypto.randomUUID(),
+          cardId: card.id,
+          month: targetMonth,
+          year: targetYear,
+          status: 'future' as const,
+          transactions: [installmentTx],
+        };
+        newInvoices = [...newInvoices, newInvoice];
+        pairs.push({ invoiceId: newInvoice.id, cardId: card.id, month: targetMonth, year: targetYear, status: newInvoice.status, tx: installmentTx });
+      } else {
+        // Fatura já existe — adicionar parcela de forma imutável
+        const inv = newInvoices[existingIdx];
+        newInvoices = [
+          ...newInvoices.slice(0, existingIdx),
+          { ...inv, transactions: [...inv.transactions, installmentTx] },
+          ...newInvoices.slice(existingIdx + 1),
+        ];
+        pairs.push({ invoiceId: inv.id, cardId: card.id, month: targetMonth, year: targetYear, status: inv.status, tx: installmentTx });
+      }
     }
 
     const newData = { ...data, tags: newTags, invoices: newInvoices };
